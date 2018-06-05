@@ -29,7 +29,7 @@ func (ftps *FTPS) Connect(host string, port int) (err error) {
 
 	ftps.host = host
 
-	ftps.conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
+	ftps.conn, err = tls.Dial("tcp", fmt.Sprintf("%s:%d", host, port), &ftps.TLSConfig)
 	if err != nil {
 		return err
 	}
@@ -41,12 +41,6 @@ func (ftps *FTPS) Connect(host string, port int) (err error) {
 		return err
 	}
 
-	_, err = ftps.request("AUTH TLS", 234)
-	if err != nil {
-		return err
-	}
-
-	ftps.conn = ftps.upgradeConnToTLS(ftps.conn)
 	ftps.text = textproto.NewConn(ftps.conn) // TODO use sync or something similar?
 
 	return
